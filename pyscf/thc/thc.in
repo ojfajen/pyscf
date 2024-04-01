@@ -1,3 +1,4 @@
-coords geom.xyz
+coordinates geom.xyz
 basis ccpvdz
 units angstrom
+thcgridlevel 2
