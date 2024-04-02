@@ -3,12 +3,18 @@
 import numpy as np
 from pyscf import lib, gto, scf, dft
 import sys
-from keywords import keywords, parse_geom, parse_input
+from keywords import keywords
 
 class thc:
     def __init__(self,keywords):
         self.keywords = keywords
         self.setup()
+        print("Starting RHF calculation")
+        self.mf = self.mol.RHF().run()
+        self.c = self.mf.mo_coeff
+        print("Fetching MO integrals")
+        self.mo_eri = self.mol.ao2mo(self.c)
+
 
     def setup(self):
         self.mol = gto.M(atom=self.keywords.coords,basis=self.keywords.basis,unit=self.keywords.units)
@@ -23,6 +29,7 @@ class thc:
         return grids
 
     def get_ao_eri(self):
+        print("Fetching AO integrals")
         if self.mol.cart:
             intor = 'int2e_cart'
         else:
@@ -31,24 +38,21 @@ class thc:
 
     def do_thc(self):
         self.get_X()
-        self.get_Z()
+        self.get_Z(self.X,self.ao_eri)
         return
 
     def get_X(self):
         self.X = self.mol.eval_gto('GTOval_sph', self.grid.coords)
-        #mo = ao.dot(mf.mo_coeff)
+        self.X_mo = self.X.dot(self.mf.mo_coeff)
         # need to deal with weights here
         return 
 
-    def get_Z(self):
-        X = self.X
+    def get_Z(self,X,eri):
         Y = np.linalg.inv(X.T @ X)
-        Zhalf = Y @ self.ao_eri
+        Zhalf = Y @ eri
         self.Z = Zhalf @ Y.T
         return 
 
-    def get_g_reconstruct(self):
-        X = self.X
-        Z = self.Z
+    def get_g_reconstruct(self,X,Z):
         return X.T @ X @ Z @ X.T @ X
 
