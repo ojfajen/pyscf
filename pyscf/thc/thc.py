@@ -15,7 +15,6 @@ class thc:
         print("Fetching MO integrals")
         self.mo_eri = self.mol.ao2mo(self.c)
 
-
     def setup(self):
         self.mol = gto.M(atom=self.keywords.coords,basis=self.keywords.basis,unit=self.keywords.units)
         self.grid = self.get_grid()

@@ -6,7 +6,6 @@ import sys
 from keywords import keywords
 from thc import thc
 
-
 def run_thc():
     keys = keywords(sys.argv[1])
     THC = thc(keys)
